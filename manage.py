@@ -4,6 +4,7 @@ from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 import redis
+from flask_migrate import Migrate,MigrateCommand
 class Config(object):
     """加载配置"""
     # 开启调试模式
@@ -33,6 +34,12 @@ CSRFProtect(app)
 
 # 创建脚本管理器
 manager = Manager(app)
+
+# 让app和db在迁移时建立关联
+Migrate(app,db)
+# 将数据库迁移脚本添加到脚本管理器,'db'是脚本的别名
+manager.add_command('db',MigrateCommand)
+
 
 @app.route('/',methods=['GET','POST'])
 def index():
