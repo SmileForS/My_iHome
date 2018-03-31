@@ -23,3 +23,30 @@ class Config(object):
     SESSION_USE_SIGNER = True
     # 设置session的会话的超时时长
     PERMANENT_SESSION_LIFETIME = 3600*24
+
+class DevelopmentConfig(Config):
+    """创建开发环境的配置"""
+
+    pass
+
+class ProductionConfig(Config):
+    """创建线上环境的配置"""
+    # 重写有差异性的配置
+    DEBUG = False
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@192.168.241.154:3306/iHome'
+
+    pass
+
+class UnittestConfig(Config):
+    """单元测试的配置"""
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@127.0.0.1:3306/iHome_testcase'
+    pass
+
+
+# 准备工厂设计模式的原材料
+configs = {
+    'default':Config,
+    'develop':DevelopmentConfig,
+    'product':ProductionConfig,
+    'unittest':UnittestConfig
+}
