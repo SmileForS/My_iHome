@@ -2,6 +2,7 @@
 from flask_script import Manager
 from flask_migrate import Migrate,MigrateCommand
 from iHome_LL import get_app
+from iHome_LL import db
 
 # 创建app
 app = get_app('default')
@@ -9,15 +10,15 @@ app = get_app('default')
 manager = Manager(app)
 
 # 让app和db在迁移时建立关联(迁移还没完成，所以没有放进__init__中)
-
-# Migrate(app,db)
+Migrate(app,db)
 # 将数据库迁移脚本添加到脚本管理器,'db'是脚本的别名
 manager.add_command('db',MigrateCommand)
-
+#
 @app.route('/',methods=['GET','POST'])
 def index():
     # 测试redis链接
-    # redis_store.set('name2','SS')
+    from iHome_LL import redis_store
+    redis_store.set('name2','HahA')
 
     # 测试session：flask自带的session模块，用于存储session
     # from flask import session
