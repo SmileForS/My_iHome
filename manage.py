@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 from flask import Flask
+from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 import redis
@@ -30,6 +31,9 @@ redis_store = redis.StrictRedis(host=Config.REDIS_HOST,port=Config.REDIS_PORT)
 # 开启csrf防护
 CSRFProtect(app)
 
+# 创建脚本管理器
+manager = Manager(app)
+
 @app.route('/',methods=['GET','POST'])
 def index():
     # 测试redis链接
@@ -38,4 +42,5 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True,host='192.168.241.154')
+    # app.run(debug=True,host='192.168.241.154')
+    manager.run()
