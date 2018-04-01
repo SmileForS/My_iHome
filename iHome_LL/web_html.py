@@ -12,7 +12,8 @@ def get_static_html(file_name):
     if not file_name:
         file_name = 'index.html'
     # 需求3：http://127.0.0.1:5000/favicon.ico  加载title图标
-    file_path = 'html/' + file_name
+    if file_name != 'favicon.ico':
+        file_name = 'html/' + file_name
     #send_static_file:内部用于将静态文件从静态文件夹发送到浏览器的功能
-    return current_app.send_static_file(file_path)
+    return current_app.send_static_file(file_name)
 
