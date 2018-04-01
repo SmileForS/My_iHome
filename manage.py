@@ -3,6 +3,7 @@ from flask_script import Manager
 from flask_migrate import Migrate,MigrateCommand
 from iHome_LL import get_app
 from iHome_LL import db
+from iHome_LL import models
 
 # 创建app
 app = get_app('default')

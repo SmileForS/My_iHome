@@ -33,7 +33,7 @@ class ProductionConfig(Config):
     """创建线上环境的配置"""
     # 重写有差异性的配置
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@192.168.241.154:3306/iHome'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@192.168.241.156:3306/iHome'
 
     pass
 
