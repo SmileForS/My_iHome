@@ -1,9 +1,5 @@
 # -*- coding:utf-8 -*-
-from flask import Blueprint
-
-# 创建蓝图
-api = Blueprint('api',__name__)
-
+from . import api
 # 注册路由
 @api.route('/',methods=['GET','POST'])
 def index():
