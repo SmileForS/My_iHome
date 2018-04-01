@@ -5,7 +5,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from config import configs
-from iHome_LL.api_1_0 import api
+
 
 # 创建可以被外界导入的数据库链接对象
 db = SQLAlchemy()
@@ -28,6 +28,7 @@ def get_app(config_name):
     CSRFProtect(app)
     # 使用session在flask扩展实现将session数据存储在redis
     Session(app)
-    # 注册蓝图到app中
+    # 注册蓝图到app中，注册蓝图的时候才导入蓝图
+    from iHome_LL.api_1_0 import api
     app.register_blueprint(api)
     return app
