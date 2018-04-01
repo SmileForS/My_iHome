@@ -31,4 +31,8 @@ def get_app(config_name):
     # 注册蓝图到app中，注册蓝图的时候才导入蓝图
     from iHome_LL.api_1_0 import api
     app.register_blueprint(api)
+    # 注册静态文件访问的蓝图到app中
+    from iHome_LL.web_html import html_blue
+    app.register_blueprint(html_blue)
+
     return app
