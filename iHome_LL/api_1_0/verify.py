@@ -6,7 +6,8 @@ from iHome_LL.utils.captcha.captcha import captcha
 from iHome_LL.utils.response_code import RET
 from . import api
 from flask import request,make_response,jsonify,abort
-
+import logging
+from flask import current_app
 
 
 @api.route('/image_code')
@@ -26,6 +27,9 @@ def get_image_code():
 
     #2. 生成图片验证码,text是验证码的文字信息，image验证码的图片信息
     name,text,image= captcha.generate_captcha()
+    current_app.logger.debug('图片验证码文字信息'+ text)
+    # 将调试信息写入logs/log
+    logging.debug('图片文字信息'+text)
     # 3.使用uuid存储图片验证码内容
     try:
         if last_uuid:
@@ -35,6 +39,8 @@ def get_image_code():
         redis_store.set('ImageCode:'+uuid,text,constants.IMAGE_CODE_REDIS_EXPIRES)
     except Exception as e:
         print e
+        #将错误信息写入logs/log
+        logging.error(e)
         return jsonify(errno=RET.DBERR,errmsg=u'保存验证码数据失败')
     #4 返回图片验证码
     response = make_response(image)
