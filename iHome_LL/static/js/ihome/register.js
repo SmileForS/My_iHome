@@ -61,10 +61,11 @@ function sendSMSCode() {
         'uuid':uuid
     };
     $.ajax({
-        url:'/api/1.0/sms_code',
-        type:'post',
+        url:'/api/1.0/sms_code',    //请求地址
+        type:'post',                // 请求方法
         data:JSON.stringify(params),
         contentType:'application/json',
+        headers:{'X-CSRFToken':getCookie('csrf_token')},
         success:function (response) {
             if (response.errno == '0'){
                 //发送短信验证码成功

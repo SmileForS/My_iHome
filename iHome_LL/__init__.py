@@ -48,7 +48,7 @@ def get_app(config_name):
     redis_store = redis.StrictRedis(host=configs[config_name].REDIS_HOST,port=configs[config_name].REDIS_PORT)
 
     # 开启csrf防护
-    # CSRFProtect(app)
+    CSRFProtect(app)
     # 使用session在flask扩展实现将session数据存储在redis
     Session(app)
 
