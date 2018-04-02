@@ -9,6 +9,8 @@ from flask import request,make_response,jsonify,abort,current_app
 import logging
 import json
 import re
+import random
+from iHome_LL.utils.sms import CCP
 
 @api.route('/sms_code',methods=['POST'])
 def send_sms_code():
@@ -17,8 +19,10 @@ def send_sms_code():
     # 2.判断参数是否缺少,并且要对手机号进行校验
     # 3.获取服务器存储的图片验证码,uuid作为key
     # 4.与客户端传入的图片验证码对比
-    # 5.对比成功,发送短信给用户
-    # 6.响应短信发送的结果
+    # 5.对比成功,生成短信验证码
+    # 6.使用云通信发送短信验证码给注册的用户手机号
+    # 7.存储短信验证码到redis中
+    # 8.响应短信发送的结果
 
     # 1.接受参数:手机号,图片验证码,uuid
     # data:保存请求报文里面的原始的字符串,开发文档约定,客户端发送的是json字符串
@@ -48,10 +52,22 @@ def send_sms_code():
     # 4.与客户端传入的图片验证码对比
     if imageCode_client != imageCode_server:
         return jsonify(errno=RET.DATAERR,errmsg=u'验证码输入有误')
-    # TODO 5.发送短信给用户
-
+    # 5.对比成功,生成短信验证码
+    sms_code = '%06d'%random.randint(0,999999)
+    current_app.logger.debug('短信验证码为:'+sms_code)
+    # 6.使用云通信发送短信验证码给注册的用户手机号
+    #返回值为1或0(自己在sms.py中定义的) 用户手机号  [随机验证码,验证码有效期(分钟)]               短信模板序号
+    result = CCP().send_template_sms(mobile,[sms_code,constants.SMS_CODE_REDIS_EXPIRES/60],'1')
+    if result != 1:
+        return jsonify(errno=RET.THIRDERR,errmsg=u'发送短信验证码失败')
+    # 7.存储短信验证码到redis中
+    try:
+        redis_store.set('Mobile:'+mobile,sms_code,constants.SMS_CODE_REDIS_EXPIRES)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'存储短信验证码失败')
     #6.响应短信发送的结果
-    return '下一步进入发送短信的逻辑'
+    return jsonify(errno=RET.OK,errmsg=u'短信验证码发送成功')
 
 
 @api.route('/image_code')
