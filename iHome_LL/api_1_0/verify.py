@@ -71,8 +71,9 @@ def get_image_code():
 
     #2. 生成图片验证码,text是验证码的文字信息，image验证码的图片信息
     name,text,image= captcha.generate_captcha()
-    current_app.logger.debug('图片验证码文字信息'+text)
     # 将调试信息写入logs/log
+    # current_app.logger.debug写不进log文件的原因:flask版本太高了，flask改成1.10.1就好了
+    current_app.logger.debug('图片验证码文字信息'+text)
     # logging.debug('图片文字信息' + text)
     # print u'haha'
 
