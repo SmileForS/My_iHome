@@ -120,4 +120,61 @@ $(document).ready(function() {
     });
 
     // TODO: 注册的提交(判断参数是否为空)
-})
+    $('.form-register').submit(function (event) {
+        //阻止form表单自己的提交事件
+        event.preventDefault();
+        //读取要发送给服务器的变量
+        var mobile =$('#mobile').val();
+        var phonecode =$('#phonecode').val();
+        var password =$('#password').val();
+        var password2 =$('#password2').val();
+
+        //校验变量是否存在
+        if(!mobile){
+            $('#mobile-err span').html('请填写正确的手机号！');
+            $('#mobile-err').show();
+            return;
+        }
+        if(!phonecode){
+            $('#phonecode-err span').html('请填写短信验证码！');
+            $('#phonecode-err').show();
+            return;
+        }
+        if(!password){
+            $('#password-err span').html('请填写密码！');
+            $('#password-err').show();
+            return;
+        }
+        if(!password2){
+            $('#password2-err span').html('两次密码不一致！');
+            $('#password2-err').show();
+            return;
+        }
+        //准备参数
+        var params = {
+            'mobile':mobile,
+            'sms_code':phonecode,
+            'password':password
+        };
+
+        //发送注册请求给服务器
+        $.ajax({
+            url:'/api/1.0/users',
+            type:'post',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{'X-CSRFToken':getCookie('csrf_token')},
+            success:function (response) {
+                if(response.errno == '0'){
+                    //如果注册成功，进入到主页
+                    location.href = '/'
+                }else {
+                    alert(response.errmsg);
+                }
+            }
+        });
+
+
+
+    });
+});

@@ -56,10 +56,11 @@ def send_sms_code():
     sms_code = '%06d'%random.randint(0,999999)
     current_app.logger.debug('短信验证码为:'+sms_code)
     # 6.使用云通信发送短信验证码给注册的用户手机号
+    # 注释以下代码，是在我们验证逻辑通过的前提下，为了方便不在频繁的发送短信验证码，我就使用假的手机号绑定我们自己生产的
     #返回值为1或0(自己在sms.py中定义的) 用户手机号  [随机验证码,验证码有效期(分钟)]               短信模板序号
-    result = CCP().send_template_sms(mobile,[sms_code,constants.SMS_CODE_REDIS_EXPIRES/60],'1')
-    if result != 1:
-        return jsonify(errno=RET.THIRDERR,errmsg=u'发送短信验证码失败')
+    # result = CCP().send_template_sms(mobile,[sms_code,constants.SMS_CODE_REDIS_EXPIRES/60],'1')
+    # if result != 1:
+    #     return jsonify(errno=RET.THIRDERR,errmsg=u'发送短信验证码失败')
     # 7.存储短信验证码到redis中
     try:
         redis_store.set('Mobile:'+mobile,sms_code,constants.SMS_CODE_REDIS_EXPIRES)
