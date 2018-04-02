@@ -50,7 +50,7 @@ def send_sms_code():
     if not imageCode_server:
         return jsonify(errno=RET.NODATA,errmsg=u'验证码不存在')
     # 4.与客户端传入的图片验证码对比
-    if imageCode_client != imageCode_server:
+    if imageCode_client.lower() != imageCode_server.lower():
         return jsonify(errno=RET.DATAERR,errmsg=u'验证码输入有误')
     # 5.对比成功,生成短信验证码
     sms_code = '%06d'%random.randint(0,999999)
