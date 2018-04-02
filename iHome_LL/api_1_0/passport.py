@@ -56,9 +56,10 @@ def register():
     # 注册时，默认手机号就是用户名，如果后面需要更换用户名，也是提供的有接口和界面
     user.name = mobile
     user.mobile=mobile
-    # TODO 密码需要加密后才能存储：目前是明文存储
-    user.password_hash = password
-
+    # 密码需要加密后才能存储：目前是明文存储
+    # user.password_hash = password
+    # 加密存储
+    user.password = password
     # 6.保存注册数据到数据库
     try:
         db.session.add(user)
