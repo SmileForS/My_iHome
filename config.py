@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import redis
+import logging
 class Config(object):
     """加载配置"""
     # 开启调试模式
@@ -26,12 +27,14 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """创建开发环境的配置"""
-
+    # 设置日志级别
+    LOGGING_LEVEL = logging.DEBUG
     pass
 
 class ProductionConfig(Config):
     """创建线上环境的配置"""
     # 重写有差异性的配置
+    LOGGING_LEVEL = logging.WARN
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@192.168.241.156:3306/iHome'
 

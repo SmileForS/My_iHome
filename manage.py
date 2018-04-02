@@ -6,7 +6,7 @@ from iHome_LL import db
 from iHome_LL import models
 
 # 创建app
-app = get_app('default')
+app = get_app('develop')
 # 创建脚本管理器
 manager = Manager(app)
 
@@ -14,7 +14,7 @@ manager = Manager(app)
 Migrate(app,db)
 # 将数据库迁移脚本添加到脚本管理器,'db'是脚本的别名
 manager.add_command('db',MigrateCommand)
-#
+
 
 
 
