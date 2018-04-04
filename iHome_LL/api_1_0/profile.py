@@ -19,7 +19,8 @@ def upload_avatar():
     """
     # 1.接收请求参数:avatar对应的图片数据,并校验
     try:
-        image_data = request.files.get('avatar_url')
+        # 这是通过前端ajax模拟form表单传过来的数据，直接用submit按钮提交时，会自动将表单中的name和value提交过来
+        image_data = request.files.get('avatar')
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR,errmsg=u'头像参数错误')
@@ -27,6 +28,7 @@ def upload_avatar():
     # 2.调用上传图片工具方法
     try:
         key = upload_image(image_data)
+        # print key
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.THIRDERR,errmsg=u'头像上传失败')

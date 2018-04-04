@@ -24,8 +24,25 @@ $(document).ready(function () {
     });
 
     // TODO: 管理上传用户头像表单的行为
+    $('#form-avatar').submit(function (event) {
+        event.preventDefault();
+        //使用ajax模拟form表单的提交
+        $(this).ajaxSubmit({
+            url:'/api/1.0/users/avatar',
+            type:'post',
+            headers:{'X-CSRFToken':getCookie('csrf_token')},
+            success:function (response) {
+                if(response.errno =='0'){
+                    //上传头像成功，刷新出头像
+                    $('#user-avatar').attr('src',response.data);
 
+                }else {
+                    alert(response.errmsg);
+                }
+            }
+        });
+    });
     // TODO: 管理用户名修改的逻辑
 
-})
+});
 
