@@ -1,13 +1,50 @@
 # -*- coding:utf-8 -*-
 # 实现注册和登陆
+import re
 
-from flask import request,json,jsonify,current_app
+from flask import request,json,jsonify,current_app,session
 from iHome_LL import redis_store,db
 from iHome_LL.utils.response_code import RET
 from . import api
 from iHome_LL.models import User
 
+@api.route('/session',methods=['POST'])
+def login():
+    """登录验证
+    1.获取参数:手机号，密码
+    2.校验参数
+    3.根据mobile 查询到指定用户
+    4.校验密码是否正确
+    5.把当前用户的登录信息写入session中
+    6.响应结果
+    """
 
+    # 1.获取参数:手机号，密码
+    json_dict = request.json
+    mobile = json_dict.get('mobile')
+    password = json_dict.get('password')
+    # 2.校验参数
+    if not all([mobile,password]):
+        return jsonify(errno=RET.PARAMERR,errmsg=u'缺少参数')
+    # 校验手机号
+    if not re.match(r'1[345679][0-9]{9}',mobile):
+        return jsonify(errno=RET.PARAMERR,errmsg=u'手机号格式不正确')
+    # 3.根据mobile 查询到指定用户
+    try:
+        user = User.query.filter(User.mobile==mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询用户失败')
+    if not user:
+        return jsonify(errno=RET.NODATA,errmsg=u'用户名或密码错误')
+    #4.校验密码是否正确
+    if not user.check_password(password):
+        return jsonify(errno=RET.PWDERR,errmsg=u'用户名或密码错误')
+    #5.把当前用户的登录信息写入session中
+    session['id'] = user.id
+    session['name'] = user.name
+    session['mobile'] = user.mobile
+    return jsonify(errno=RET.OK,errmsg=u'登录成功')
 
 @api.route('/users',methods=["POST"])
 def register():
