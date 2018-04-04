@@ -27,7 +27,8 @@ def login():
     if not all([mobile,password]):
         return jsonify(errno=RET.PARAMERR,errmsg=u'缺少参数')
     # 校验手机号
-    if not re.match(r'1[345679][0-9]{9}',mobile):
+    if not re.match(r'^1[345678][0-9]{9}$',mobile):
+        print
         return jsonify(errno=RET.PARAMERR,errmsg=u'手机号格式不正确')
     # 3.根据mobile 查询到指定用户
     try:
@@ -59,7 +60,7 @@ def register():
     7.响应结果
     :return:
     """
-    # 1.获取请求参数：手机号，短信验证码，密码
+    # 1.获取请求参数：手机号，短信验证码，密码ss
     # 方法1
     # json_str = request.data
     # json_dict = json.loads(json_str)
