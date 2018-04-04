@@ -41,6 +41,17 @@ class User(BaseModel, db.Model):
     def check_password(self,password):
         """校验密码:如果匹配成功返回True.反之，返回False"""
         return check_password_hash(self.password_hash,password)
+
+    def to_dict(self):
+        """封装要响应的字典"""
+        response_data = {
+            'avatar_url': self.avatar_url,
+            'name': self.name,
+            'mobile': self.mobile,
+            'user_id': self.id
+        }
+        return response_data
+        
 class Area(BaseModel, db.Model):
     """城区"""
 
