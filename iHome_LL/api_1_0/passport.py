@@ -8,14 +8,14 @@ from iHome_LL.utils.response_code import RET
 from . import api
 from iHome_LL.models import User
 
-@api.route('/session',methods=['POST'])
+@api.route('/sessions',methods=['POST'])
 def login():
     """登录验证
     1.获取参数:手机号，密码
     2.校验参数
     3.根据mobile 查询到指定用户
     4.校验密码是否正确
-    5.把当前用户的登录信息写入session中
+    5.把当前用户的登录信息写入sessions中
     6.响应结果
     """
 
@@ -88,6 +88,10 @@ def register():
     #4.与客户端的短信验证码对比
     if sms_code_server != sms_code_client:
         return jsonify(errno=RET.DATAERR,errmsg=u'短信验证码输入有误')
+    # 判断用户名是否已经被注册
+    if User.query.filter(User.mobile==mobile):
+        return jsonify(errno=RET.DATAEXIST,errmsg=u'用户已注册')
+
     # 5.如果一致，创建User模型类对象
     user = User()
     # 注册时，默认手机号就是用户名，如果后面需要更换用户名，也是提供的有接口和界面
@@ -105,5 +109,9 @@ def register():
         current_app.logger.error(e)
         db.session.rollback()
         return jsonify(errno=RET.DBERR,errmsg=u'注册数据保存失败')
+    # 把当前用户的登录信息写入sessions中
+    session['id'] = user.id
+    session['name'] = user.name
+    session['mobile'] = user.mobile
     # 7.响应结果
     return jsonify(errno=RET.OK,errmsg=u'注册成功')
