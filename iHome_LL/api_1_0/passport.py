@@ -42,7 +42,7 @@ def login():
     if not user.check_password(password):
         return jsonify(errno=RET.PWDERR,errmsg=u'用户名或密码错误')
     #5.把当前用户的登录信息写入session中
-    session['id'] = user.id
+    session['user_id'] = user.id
     session['name'] = user.name
     session['mobile'] = user.mobile
     return jsonify(errno=RET.OK,errmsg=u'登录成功')
@@ -111,7 +111,7 @@ def register():
         db.session.rollback()
         return jsonify(errno=RET.DBERR,errmsg=u'注册数据保存失败')
     # 把当前用户的登录信息写入sessions中
-    session['id'] = user.id
+    session['user_id'] = user.id
     session['name'] = user.name
     session['mobile'] = user.mobile
     # 7.响应结果
