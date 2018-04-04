@@ -4,9 +4,22 @@ import re
 
 from flask import request,json,jsonify,current_app,session
 from iHome_LL import redis_store,db
+from iHome_LL.utils.common import login_required
 from iHome_LL.utils.response_code import RET
 from . import api
 from iHome_LL.models import User
+
+
+@api.route('/sessions',methods=['DELETE'])
+@login_required
+def logout():
+    """退出登录接口"""
+    #1.清理session数据
+    session.pop('user_id')
+    session.pop('name')
+    session.pop('mobile')
+
+    return jsonify(errno=RET.OK,errmsg=u'退出登录成功')
 
 @api.route('/sessions',methods=['POST'])
 def login():

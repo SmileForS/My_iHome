@@ -18,6 +18,8 @@ $(document).ready(function () {
             //如果登录成功
             $('#user-avatar').attr('src',response.data.avatar_url);
             $('#user-name').val(response.data.name);
+        }else if(response.errno =='4101'){
+            location.href = '/'
         }else {
             alert(response.errmsg);
         }
@@ -36,6 +38,8 @@ $(document).ready(function () {
                     //上传头像成功，刷新出头像
                     $('#user-avatar').attr('src',response.data);
 
+                }else if(response.errno =='4101'){
+                    location.href = '/'
                 }else {
                     alert(response.errmsg);
                 }
@@ -62,6 +66,8 @@ $(document).ready(function () {
                 if(response.errno =='0'){
                     showSuccessMsg();
 
+                }else if(response.errno =='4101'){
+                    location.href = '/'
                 }else {
                     alert(response.errmsg)
                 }

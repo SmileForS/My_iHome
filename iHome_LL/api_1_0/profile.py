@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 # 个人中心
+from flask import g
 from flask import request
 from flask import session,current_app,jsonify
 from iHome_LL import db,constants
@@ -7,12 +8,58 @@ from iHome_LL.models import User
 from . import api
 from iHome_LL.utils.image_storage import upload_image
 from iHome_LL.utils.response_code import RET
+from iHome_LL.utils.common import login_required
+
+
+@api.route('/users/auth',methods=['POST'])
+def set_user_auth():
+    """提供用户实名认证
+    0.判断用户是否是登录用户, @login_required
+    1.接收参数:real_name,id_card
+    2.判断参数是否缺少:这里就不对身份证进行格式的校验，省略掉
+    3.查询当前的登录用户模型对象
+    4.将real_name,id_card赋值给当前用户模型对象
+    5.将新的数据写入到数据库
+    6.响应结果
+    """
+    #1.接收参数:real_name,id_card
+    json_dict = request.json
+    real_name = json_dict.get('real_name')
+    id_card = json_dict.get('id_card')
+
+    # 2.判断参数是否缺少:这里就不对身份证进行格式的校验，省略掉
+    if not all([real_name,id_card]):
+        return jsonify(errno=RET.PARAMERR,errmsg=u'参数有误')
+    # 3.查询当前的登录用户模型对象
+    user_id =g.user_id
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询用户信息失败')
+    if not user:
+        return jsonify(errno=RET.NODATA,errmsg=u'用户不存在')
+    # 4.将real_name,id_card赋值给当前用户模型对象
+    user.real_name = real_name
+    user.id_card = id_card
+
+    # 5.将新的数据写入到数据库
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,errmsg=u'保存实名认证数据失败')
+
+    # 6.响应结果
+    return jsonify(errno=RET.OK,errmsg=u'实名认证成功')
 
 
 @api.route('/users/name',methods=['PUT'])
+@login_required
 def set_user_name():
     """修改用户名
-    0.TODO判断用户是否登陆
+    0.TODO判断用户是否登陆 @login_required
     1.接收用户传入的新名字 new_name
     2.判断参数是否为空
     3.查询当前登陆用户
@@ -27,7 +74,8 @@ def set_user_name():
     if not new_name:
         return jsonify(errno=RET.PARAMERR,errmsg=u'参数错误')
     # 3.查询当前登陆用户
-    user_id = session.get('user_id')
+    # user_id = session.get('user_id')
+    user_id = g.user_id
     try:
         user = User.query.get(user_id)
     except Exception as e:
@@ -48,6 +96,7 @@ def set_user_name():
     return jsonify(errno=RET.OK,errmsg=u'修改用户名成功')
 
 @api.route('/users/avatar',methods=["POST"])
+@login_required
 def upload_avatar():
     """提供用户头像上传
     0.TODO 先判断用户是否登录
@@ -74,7 +123,8 @@ def upload_avatar():
 
     # 3.存储图片的key到user.avatar_url属性中
     # 获取登陆用户的user_id
-    user_id = session.get('user_id')
+    # user_id = session.get('user_id')
+    user_id = g.user_id
     # 查询登陆用户对象
     try:
         user = User.query.get(user_id)
@@ -105,6 +155,7 @@ def upload_avatar():
 
 
 @api.route('/users')
+@login_required
 def get_user_info():
     """获取用户基本信息
     0.TODO判断用户是否登录
@@ -115,7 +166,8 @@ def get_user_info():
     """
     # 1.获取登录用户的id
     # session中没有数据的时候user_id=None
-    user_id = session.get('user_id')
+    # user_id = session.get('user_id')
+    user_id = g.user_id
     # 2.查询出登录用户的基本信息
     try:
         user = User.query.get(user_id)
