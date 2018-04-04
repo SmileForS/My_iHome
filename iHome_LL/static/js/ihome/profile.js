@@ -43,6 +43,30 @@ $(document).ready(function () {
         });
     });
     // TODO: 管理用户名修改的逻辑
+    $('#form-name').submit(function (event) {
+        event.preventDefault();
+        var new_name = $('#user-name').val();
+        if(!new_name){
+            alert('请输入新的用户名');
+        }
+        var params = {
+            'name':new_name
+        };
+        $.ajax({
+            url:'/api/1.0/users/name',
+            type:'put',
+            data:JSON.stringify(params),
+            contentType:'application/json',
+            headers:{'X-CSRFToken':getCookie('csrf_token')},
+            success:function (response) {
+                if(response.errno =='0'){
+                    showSuccessMsg();
 
+                }else {
+                    alert(response.errmsg)
+                }
+            }
+        });
+    });
 });
 

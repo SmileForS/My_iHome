@@ -22,7 +22,7 @@ def set_user_name():
     """
     # 1.接收用户传入的新名字 new_name
     json_dict = request.json
-    new_name = json_dict.get('new_name')
+    new_name = json_dict.get('name')
     # 2.判断参数是否为空
     if not new_name:
         return jsonify(errno=RET.PARAMERR,errmsg=u'参数错误')
