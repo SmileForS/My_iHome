@@ -16,15 +16,18 @@ def get_user_info():
     4.响应登录用户信息
     """
     # 1.获取登录用户的id
+    # session中没有数据的时候user_id=None
     user_id = session.get('user_id')
     # 2.查询出登录用户的基本信息
     try:
-        user = User.query.get('user_id')
+        user = User.query.get(user_id)
+        # current_app.logger.debug(user)
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR,errmsg=u'查询用户信息失败')
+        # 当用户没登录的时候会报这个错误
+        return jsonify(errno=RET.DBERR,errmsg=u'查询用户信息失败,请重新登录')
     if not user:
-        return jsonify(errno =RET.NODATA,errmsg=u'用户不存在')
+        return jsonify(errno=RET.NODATA,errmsg=u'用户不存在')
 
     # 3.构造响应数据
     response_data = {
