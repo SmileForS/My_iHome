@@ -12,6 +12,7 @@ from iHome_LL.utils.common import login_required
 
 
 @api.route('/users/auth',methods=['POST'])
+@login_required
 def set_user_auth():
     """提供用户实名认证
     0.判断用户是否是登录用户, @login_required
