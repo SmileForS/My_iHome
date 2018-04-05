@@ -14,7 +14,17 @@ function getCookie(name) {
 
 $(document).ready(function(){
     // TODO: 查询用户的实名认证信息
-
+    $.get('/api/1.0/users/auth',function (response) {
+       if (response.errno=='0'){
+           $('#real-name').val(response.data.real_name);
+           $('#id-card').val(response.data.id_card);
+           //将real_name,id_card变成不可交互的框
+           $('#real-name').attr('disabled',true);
+           $('#id-card').attr('disabled',true);
+           //将保存按钮隐藏
+           $('.btn-success').hide();
+       }
+    });
 
     // TODO: 管理实名信息表单的提交行为
     $('#form-auth').submit(function (event) {

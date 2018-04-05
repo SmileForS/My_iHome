@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 # 个人中心
-from flask import g
-from flask import request
-from flask import session,current_app,jsonify
+from flask import session,current_app,jsonify,g,request
 from iHome_LL import db,constants
 from iHome_LL.models import User
 from . import api
@@ -10,6 +8,30 @@ from iHome_LL.utils.image_storage import upload_image
 from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
 
+
+@api.route('/users/auth',methods=['GET'])
+@login_required
+def get_user_auth():
+    """查询实名认证信息"""
+    user_id = g.user_id
+    # 查询登录的用户的信息
+    try:
+        user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询用户信息失败')
+    if not user:
+        return jsonify(errno=RET.NODATA,errmsg=u'用户不存在')
+    #获取real_name和id_card
+    real_name = user.real_name
+    id_card = user.id_card
+    # 组织响应数据
+    response_data = {
+        'real_name':real_name,
+        'id_card':id_card
+    }
+    # 响应结果
+    return jsonify(errno=RET.OK,errmsg=u'查询实名认证信息成功',data = response_data)
 
 @api.route('/users/auth',methods=['POST'])
 @login_required
