@@ -9,6 +9,14 @@ from iHome_LL.utils.response_code import RET
 from . import api
 from iHome_LL.models import User
 
+@api.route('/sessions')
+def check_login():
+    """判断用户是否登录
+    提示:该接口是用于前端在渲染界面时判断使用的根据不同的登陆状态,展示不同的界面
+    """
+    user_id = session.get('user_id')
+    name = session.get('name')
+    return jsonify(errno=RET.OK,errmsg=u'OK',data={'user_id':user_id,'name':name})
 
 @api.route('/sessions',methods=['DELETE'])
 @login_required
@@ -85,6 +93,7 @@ def register():
     mobile = json_dict.get('mobile')
     sms_code_client = json_dict.get('sms_code')
     password = json_dict.get('password')
+    print mobile
 
     # 2.判断参数是否缺少
     if not all([mobile,sms_code_client,password]):
@@ -103,7 +112,7 @@ def register():
     if sms_code_server != sms_code_client:
         return jsonify(errno=RET.DATAERR,errmsg=u'短信验证码输入有误')
     # 判断用户名是否已经被注册
-    if User.query.filter(User.mobile==mobile):
+    if User.query.filter(User.mobile==mobile).first():
         return jsonify(errno=RET.DATAEXIST,errmsg=u'用户已注册')
 
     # 5.如果一致，创建User模型类对象
