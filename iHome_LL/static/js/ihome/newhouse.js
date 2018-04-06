@@ -51,6 +51,10 @@ $(document).ready(function(){
            headers:{'X-CSRFToken':getCookie('csrf_token')},
            success:function (response) {
                if (response.errno =='0'){
+                   //需求：发布房屋基本信息成功．需要展示发布房屋图片的界面
+                   //隐藏发布基本信息表单，展示发布房屋图片的表单
+                   $('#form-house-info').hide();
+                   $('#form-house-image').show();
                    alert(response.errmsg)
                }else if(response.errno =='4101'){
                    location.href='/'
