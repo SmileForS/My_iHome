@@ -7,6 +7,12 @@ from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
 from iHome_LL import db
 
+@api.route('/houses/image',methods = ["POST"])
+def upload_house_image():
+    """上传房屋图片"""
+    pass
+
+
 @api.route('/houses',methods=["POST"])
 @login_required
 def pub_house():
@@ -78,7 +84,7 @@ def pub_house():
     #     return jsonify(errno=RET.DBERR,errmsg=u'发布新房源失败')
 
     # 5.响应结果
-    return jsonify(errno=RET.OK,errmsg=u'发布新房源成功')
+    return jsonify(errno=RET.OK,errmsg=u'发布新房源成功',data = {'house_id':house.id})
 
 
 @api.route('/areas')

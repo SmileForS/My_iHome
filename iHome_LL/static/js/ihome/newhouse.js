@@ -55,7 +55,11 @@ $(document).ready(function(){
                    //隐藏发布基本信息表单，展示发布房屋图片的表单
                    $('#form-house-info').hide();
                    $('#form-house-image').show();
-                   alert(response.errmsg)
+                   // alert(response.errmsg)
+                   //接收后端传过来的house_id，传入上传图片的input的value值中
+                   //<input type="file" accept="image/*" name="house_image" id="house-image">
+                   $('#house-image').val(response.data.house_id);
+
                }else if(response.errno =='4101'){
                    location.href='/'
                }else{
