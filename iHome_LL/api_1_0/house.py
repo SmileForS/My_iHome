@@ -5,7 +5,7 @@ from iHome_LL.models import Area,House,Facility,HouseImage
 from flask import current_app,jsonify,request,g,session
 from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
-from iHome_LL import db,constants
+from iHome_LL import db,constants,redis_store
 from iHome_LL.utils.image_storage import upload_image
 
 @api.route('/houses/index')
@@ -198,6 +198,14 @@ def get_areas_info():
     2.组织响应数据
     3.响应结果
     """
+    # 查询缓存数据,如果有缓存数据,就使用缓存数据,反之,就查询,并缓存新的数据
+    try:
+        areas_dict_list = redis_store.get('Areas')
+        if areas_dict_list:
+            return jsonify(errno=RET.OK,errmsg=u'OK',data=eval(areas_dict_list))
+    except Exception as e:
+        current_app.logger.error(e)
+
     # 1.从数据库中查出所有城区的信息
     try:
         areas = Area.query.all()
@@ -209,5 +217,10 @@ def get_areas_info():
     for area in areas:
         areas_dict_list.append(area.to_dict())
 
+    # 缓存城区信息到redis:没有缓存成功也没有影响,可以查询
+    try:
+        redis_store.set('Areas',areas_dict_list,constants.AREA_INFO_REDIS_EXPIRES)
+    except Exception as e:
+        current_app.logger.error(e)
     # 3.响应结果
     return jsonify(errno=RET.OK,errmsg=u'OK',data =areas_dict_list)
