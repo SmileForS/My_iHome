@@ -123,13 +123,13 @@ def pub_house():
     # print house.facilities
     #
     # 4.保存到数据库
-    # try:
-    #     db.session.add(house)
-    #     db.session.commit()
-    # except Exception as e:
-    #     current_app.logger.error(e)
-    #     db.session.rollback()
-    #     return jsonify(errno=RET.DBERR,errmsg=u'发布新房源失败')
+    try:
+        db.session.add(house)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,errmsg=u'发布新房源失败')
 
     # 5.响应结果
     return jsonify(errno=RET.OK,errmsg=u'发布新房源成功',data = {'house_id':house.id})
