@@ -8,6 +8,31 @@ from iHome_LL.utils.common import login_required
 from iHome_LL import db,constants
 from iHome_LL.utils.image_storage import upload_image
 
+@api.route('/houses/index')
+def get_house_index():
+    """
+    提供房屋最新的推荐
+    1.查询最新发布的五个房屋信息,(按照时间排序)
+    2.构造响应数据
+    3.响应结果
+    :return:
+    """
+    #1.查询最新发布的五个房屋信息,(按照时间排序)
+    try:
+        houses = House.query.order_by(House.create_time.desc()).limit(constants.HOME_PAGE_MAX_HOUSES)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询房屋信息失败')
+
+    # 2.构造响应数据
+    houses_dict_list = []
+    for house in houses:
+        houses_dict_list.append(house.to_basic_dict())
+
+    # 3.响应结果
+        return jsonify(errno=RET.OK,errmsg=u'OK',data=houses_dict_list)
+
+
 @api.route('/houses/detail/<int:house_id>')
 def get_house_detail(house_id):
     """
@@ -28,7 +53,6 @@ def get_house_detail(house_id):
         return jsonify(errno=RET.NODATA,errmsg=u'房屋不存在')
     # 2,构造响应数据 house模型类中有一个将详细信息转换成字典的方法
     response_data = house.to_full_dict()
-    # print response_data
     # 获取user_id:当用户登录后访问detail.html，就会有user_id，反之，没有user_id
     login_user_id = session.get('user_id')
     # 3.响应结果

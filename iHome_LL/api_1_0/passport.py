@@ -93,7 +93,7 @@ def register():
     mobile = json_dict.get('mobile')
     sms_code_client = json_dict.get('sms_code')
     password = json_dict.get('password')
-    print mobile
+
 
     # 2.判断参数是否缺少
     if not all([mobile,sms_code_client,password]):
