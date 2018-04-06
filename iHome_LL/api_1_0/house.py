@@ -47,7 +47,12 @@ def upload_house_image():
     house_image = HouseImage()
     house_image.house_id=house.id
     house_image.url = key
+
+    # 选择一个图片，作为房屋的默认图片
+    # index_image_url是房屋信息模型的字段
+    if not house.index_image_url:
     # 保存到数据库
+        house.index_image_url = key
     try:
         db.session.add(house_image)
         db.session.commit()
