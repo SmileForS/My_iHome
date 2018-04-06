@@ -2,7 +2,7 @@
 
 from . import api
 from iHome_LL.models import Area,House,Facility,HouseImage
-from flask import current_app,jsonify,request,g
+from flask import current_app,jsonify,request,g,session
 from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
 from iHome_LL import db,constants
@@ -28,9 +28,11 @@ def get_house_detail(house_id):
         return jsonify(errno=RET.NODATA,errmsg=u'房屋不存在')
     # 2,构造响应数据 house模型类中有一个将详细信息转换成字典的方法
     response_data = house.to_full_dict()
-    print response_data
+    # print response_data
+    # 获取user_id:当用户登录后访问detail.html，就会有user_id，反之，没有user_id
+    login_user_id = session.get('user_id')
     # 3.响应结果
-    return jsonify(errno=RET.OK,errmsg=u'OK',data={'house':response_data})
+    return jsonify(errno=RET.OK,errmsg=u'OK',data={'house':response_data,'login_user_id':login_user_id})
 
 @api.route('/houses/image',methods = ["POST"])
 @login_required

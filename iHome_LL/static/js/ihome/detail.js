@@ -35,7 +35,16 @@ $(document).ready(function(){
             swiper();
             var html_detail =template('house-detail-tmpl',{'house':response.data.house});
             $('.detail-con').html(html_detail);
+            //实现即刻预定按钮的显示逻辑
+            if (response.data.house.user_id != response.data.login_user_id){
+               // 当前查看详情的用户不是登录用户 展示即刻预定按钮
+                $('.book-house').show();
+                //添加即刻预定的点击跳转的逻辑
+                $('.book-house').attr('href','booking.html?hid='+response.data.house.hid)
 
+            }else{
+                $('.book-house').hide();
+            }
 
         }else {
             alert(response.errmsg);
