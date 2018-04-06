@@ -23,7 +23,12 @@ $(document).ready(function(){
            $('#id-card').attr('disabled',true);
            //将保存按钮隐藏
            $('.btn-success').hide();
-       }
+           //sessionerr
+       }else if(response.errno =='4101'){
+           location.href = '/';
+       }else {
+           alert(response.errmsg)
+        }
     });
 
     // TODO: 管理实名信息表单的提交行为
