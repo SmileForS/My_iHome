@@ -10,10 +10,13 @@ $(document).ready(function(){
     // TODO: 在页面加载完毕之后获取区域信息
     $.get('/api/1.0/areas',function (response) {
        if (response.errno =='0'){
-           $.each(response.data,function (i,area) {
-               $('#area-id').append("<option value='"+area.aid+"'>"+area.aname+"</option>")
-               // console.log(response.data)
-           })
+           // $.each(response.data,function (i,area) {
+               // $('#area-id').append("<option value='"+area.aid+"'>"+ar
+               // art-template模板引擎渲染界面
+            // 生成要渲染的html数据
+               var html = template('areas-tmpl',{'areas':response.data});
+               $('#area-id').html(html);
+           // })
        }else {
            alert(response.errmsg)
        }
@@ -43,6 +46,7 @@ $(document).ready(function(){
             facilities[i] = elem.value;
         });
         params['facility'] = facilities;
+        console.log(params);
         $.ajax({
            url:'/api/1.0/houses',
            type:'post',
