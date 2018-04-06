@@ -22,14 +22,11 @@ def get_user_auth():
         return jsonify(errno=RET.DBERR,errmsg=u'查询用户信息失败')
     if not user:
         return jsonify(errno=RET.NODATA,errmsg=u'用户不存在')
-    #获取real_name和id_card
-    real_name = user.real_name
-    id_card = user.id_card
+    # #获取real_name和id_card
+    # real_name = user.real_name
+    # id_card = user.id_card
     # 组织响应数据
-    response_data = {
-        'real_name':real_name,
-        'id_card':id_card
-    }
+    response_data = user.auth_to_dict()
     # 响应结果
     return jsonify(errno=RET.OK,errmsg=u'查询实名认证信息成功',data = response_data)
 

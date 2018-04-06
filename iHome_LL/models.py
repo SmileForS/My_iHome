@@ -45,13 +45,20 @@ class User(BaseModel, db.Model):
     def to_dict(self):
         """封装要响应的字典"""
         response_data = {
-            'avatar_url': constants.QINIU_DOMIN_PREFIX +self.avatar_url,
+                                                        # 跟三目运算符一样，判断是否有avatar_url,如果没有，默认传个空字符串
+            'avatar_url': constants.QINIU_DOMIN_PREFIX + (self.avatar_url if self.avatar_url else ""),
             'name': self.name,
             'mobile': self.mobile,
             'user_id': self.id
         }
         return response_data
-
+    def auth_to_dict(self):
+        """实名认证要用到的字典"""
+        response_data = {
+            'real_name': self.real_name,
+            'id_card': self.id_card
+        }
+        return response_data
 class Area(BaseModel, db.Model):
     """城区"""
 
