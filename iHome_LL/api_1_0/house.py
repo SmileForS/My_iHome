@@ -50,6 +50,16 @@ def get_houses_search():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR,errmsg=u'参数有误')
+
+    # 在查询数据之前，读取缓存的数据
+    try:
+        name = 'house_list_%s_%s_%s_%s' % (aid, sd, ed, sk)
+        response_data = redis_store.hget(name)
+        return jsonify(errno=RET.OK,errmsg=u'缓存数据查询成功',data = response_data)
+    except Exception as e:
+        current_app.logger.error(e)
+        # redis缓存不成功可以不用管
+
     #1.查询所有房屋的信息 houses = [House,House....]
     try:
         # 无条件查询所有房屋数据
@@ -107,6 +117,24 @@ def get_houses_search():
         'houses':houses_dict_list,
         'total_page':total_page
     }
+
+    # 在构造完响应数据之后缓存房屋列表数据
+    try:
+        name = 'house_list_%s_%s_%s_%s'%(aid,sd,ed,sk)
+        # 创建redis管道,用于存放后面的所有数据
+        pipeline = redis_store.pipeline()
+        # 开启事务
+        pipeline.multi()
+
+        # 需要看做整体的redis操作
+        redis_store.hset(name,p,response_data)
+        redis_store.expire(name,constants.HOUSE_LIST_REDIS_EXPIRES)
+
+        # 执行/提交事务
+        pipeline.execute()
+    except Exception as e:
+        current_app.logger.error(e)
+        # redis发现异常,不需要手动回滚,也不需要返回数据,直接重新查询就好
 
     # 3.响应结果
     return jsonify(errno=RET.OK,errmsg=u'OK',data = response_data)
