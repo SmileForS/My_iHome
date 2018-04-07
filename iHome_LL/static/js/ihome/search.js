@@ -45,11 +45,20 @@ function updateHouseData(action) {
         p:next_page
     };
     // TODO: 获取房屋列表信息
+    // 参数1 ： 请求地址；参数2：请求参数(可选的，如果有就传入，没有就省略)；参数3：请求完成后的回调
+    // params : 存储的是要通过GET请求发送给服务器的字符串信息
+    // http://127.0.0.1:5000/search.html?aid=2&aname=&sd=&ed=
     $.get('/api/1.0/houses/search',params,function (response) {
+        //TODO 1.能够进入该回调,说明上次的请求结束,需要将house_data_querying=false
         if(response.errno =='0'){
-            //生成要渲染的html内容
+            //TODO 2.后端需要将总页数返回给前端并保存
+
+            //使用art-template模板引擎，生成要渲染的html内容
             var html = template('house-list-tmpl',{'houses':response.data});
             $('.house-list').html(html)
+            // TODO 5.上拉刷新得到新的数据时,不要覆盖上一页的数据,需要拼接到上一页的下面
+            //TODO 4.要区分用户是直接加载数据还是上拉刷新 action==renew表示重新加载新的数据
+            //TODO 3.每次上拉刷新成功后,需要对 cur_page 累加 1
         }else {
             alert(response.errmsg)
         }
