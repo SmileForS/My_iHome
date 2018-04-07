@@ -54,8 +54,8 @@ function updateHouseData(action) {
             //TODO 2.后端需要将总页数返回给前端并保存
 
             //使用art-template模板引擎，生成要渲染的html内容
-            var html = template('house-list-tmpl',{'houses':response.data});
-            $('.house-list').html(html)
+            var html = template('house-list-tmpl',{'houses':response.data.houses});
+            $('.house-list').html(html);
             // TODO 5.上拉刷新得到新的数据时,不要覆盖上一页的数据,需要拼接到上一页的下面
             //TODO 4.要区分用户是直接加载数据还是上拉刷新 action==renew表示重新加载新的数据
             //TODO 3.每次上拉刷新成功后,需要对 cur_page 累加 1
