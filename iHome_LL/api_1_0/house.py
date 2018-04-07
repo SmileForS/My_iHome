@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 
 from . import api
-from iHome_LL.models import Area,House,Facility,HouseImage
+from iHome_LL.models import Area,House,Facility,HouseImage,Order
 from flask import current_app,jsonify,request,g,session
 from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
 from iHome_LL import db,constants,redis_store
 from iHome_LL.utils.image_storage import upload_image
-
+import datetime
 
 @api.route('/houses/search')
 def get_houses_search():
@@ -18,17 +18,35 @@ def get_houses_search():
     3.响应结果
     :return:
     """
-    current_app.logger.debug(request.args)
+    # current_app.logger.debug(request.args)
     # 0.获取地区参数
     aid = request.args.get('aid')
     # print aid
     # 获取排序参数:new:最新,按照发布时间倒序;booking:订单量，安装订单量倒序；price-inc 价格低到高；price-des 价格高到低
     sk = request.args.get('sk')
     # 获取用户传入的页码
-    p = request.args.get('p')
+    p = request.args.get('p','1')
+    # 获取入住时间
+    sd = request.args.get('sd','')
+    # 获取离开时间
+    ed = request.args.get('ed','')
+
+    start_date = None
+    end_date = None
+
     # 校验参数
     try:
         p = int(p)
+        if sd:
+            # 将时间字符串转成时间对象
+            start_date = datetime.datetime.strptime(sd,'%Y-%m-%d')
+        if ed:
+            end_date = datetime.datetime.strptime(ed, '%Y-%m-%d')
+        # 自己校验入住时间是否小于离开时间
+        if start_date and end_date:
+            # 断言：入住时间一定小于离开时间，如果不满足，就抛出异常
+            assert start_date < end_date,Exception(u'入住时间有误')
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR,errmsg=u'参数有误')
@@ -42,7 +60,19 @@ def get_houses_search():
         # 根据用户选中的城区信息，筛选出满足条件的房屋信息
         if aid:
             house_query = house_query.filter(House.area_id == aid)
-
+        # 根据用户传入的入住时间和离开的时间，跟订单里面的时间进行对比
+        # 如果用户传入的时间段，在订单中，也存在，就把满足冲突条件的订单查询出来 conflict_orders
+        conflict_orders = []
+        if start_date and end_date:
+            conflict_orders=Order.query.filter(start_date < Order.end_date,end_date > Order.begin_date).all()
+        elif start_date:
+            conflict_orders=Order.query.filter(start_date < Order.end_date).all()
+        elif end_date:
+            conflict_orders = Order.query.filter(end_date > Order.begin_date).all()
+        if conflict_orders:
+            conflict_house_ids = [order.house_id for order in conflict_orders]
+            # 最后查询不在这个列表中的房屋信息
+            house_query = house_query.filter(House.id.notin_(conflict_house_ids))
         # 根据排序规则对数据进行排序
         if sk =='booking':
             house_query = house_query.order_by(House.order_count.desc())
@@ -52,8 +82,6 @@ def get_houses_search():
             house_query = house_query.order_by(House.price.desc())
         else:
             house_query = house_query.order_by(House.create_time.desc())
-
-
         # 无条件的从BaseQuery对象中取出数据
         # houses = house_query.all()
         # print houses
