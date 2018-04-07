@@ -18,9 +18,24 @@ def get_houses_search():
     3.响应结果
     :return:
     """
+    # 0.获取参数
+    aid = request.args.get('aid')
+    print aid
     #1.查询所有房屋的信息
     try:
-        houses = House.query.all()
+        # 无条件查询所有房屋数据
+        # houses = House.query.all()
+        # 得到BaseQuery对象,保存即将要查询出来的数据
+        house_query = House.query
+
+        # 根据用户选中的城区信息，筛选出满足条件的房屋信息
+        if aid:
+            house_query = house_query.filter(House.area_id == aid)
+
+        # 无条件的从BaseQuery对象中取出数据
+        houses = house_query.all()
+        print houses
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR,errmsg=u'查询房屋信息失败')
