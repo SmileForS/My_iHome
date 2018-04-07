@@ -18,10 +18,13 @@ def get_houses_search():
     3.响应结果
     :return:
     """
-    # 0.获取参数
+    current_app.logger.debug(request.args)
+    # 0.获取地区参数
     aid = request.args.get('aid')
-    print aid
-    #1.查询所有房屋的信息
+    # print aid
+    # 获取排序参数:new:最新,按照发布时间倒序;booking:订单量，安装订单量倒序；price-inc 价格低到高；price-des 价格高到低
+    sk = request.args.get('sk')
+    #1.查询所有房屋的信息 houses = [House,House....]
     try:
         # 无条件查询所有房屋数据
         # houses = House.query.all()
@@ -31,6 +34,16 @@ def get_houses_search():
         # 根据用户选中的城区信息，筛选出满足条件的房屋信息
         if aid:
             house_query = house_query.filter(House.area_id == aid)
+
+        # 根据排序规则对数据进行排序
+        if sk =='booking':
+            house_query = house_query.order_by(House.order_count.desc())
+        elif sk =='price-inc':
+            house_query = house_query.order_by(House.price.asc())
+        elif sk == 'price-des':
+            house_query = house_query.order_by(House.price.desc())
+        else:
+            house_query = house_query.order_by(House.create_time.desc())
 
         # 无条件的从BaseQuery对象中取出数据
         houses = house_query.all()
