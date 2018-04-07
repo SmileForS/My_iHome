@@ -16,13 +16,15 @@ $(document).ready(function(){
     // TODO: 查询用户的实名认证信息
     $.get('/api/1.0/users/auth',function (response) {
        if (response.errno=='0'){
-           $('#real-name').val(response.data.real_name);
-           $('#id-card').val(response.data.id_card);
-           //将real_name,id_card变成不可交互的框
-           $('#real-name').attr('disabled',true);
-           $('#id-card').attr('disabled',true);
-           //将保存按钮隐藏
-           $('.btn-success').hide();
+           if (response.data.real_name && response.data.id_card){
+               $('#real-name').val(response.data.real_name);
+               $('#id-card').val(response.data.id_card);
+               //将real_name,id_card变成不可交互的框
+               $('#real-name').attr('disabled',true);
+               $('#id-card').attr('disabled',true);
+               //将保存按钮隐藏
+               $('.btn-success').hide();
+           }
            //sessionerr
        }else if(response.errno =='4101'){
            location.href = '/';

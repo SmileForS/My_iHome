@@ -8,6 +8,32 @@ from iHome_LL.utils.common import login_required
 from iHome_LL import db,constants,redis_store
 from iHome_LL.utils.image_storage import upload_image
 
+
+@api.route('/houses/search')
+def get_houses_search():
+    """
+    搜索房屋列表
+    1.查询所有房屋的信息
+    2.构造响应数据
+    3.响应结果
+    :return:
+    """
+    #1.查询所有房屋的信息
+    try:
+        houses = House.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询房屋信息失败')
+
+    # 2.构造响应数据
+    houses_dict_list = []
+    for house in houses:
+        houses_dict_list.append(house.to_basic_dict())
+
+    # 3.响应结果
+    return jsonify(errno=RET.OK,errmsg=u'OK',data = houses_dict_list)
+
+
 @api.route('/houses/index')
 def get_house_index():
     """
@@ -20,6 +46,7 @@ def get_house_index():
     #1.查询最新发布的五个房屋信息,(按照时间排序)
     try:
         houses = House.query.order_by(House.create_time.desc()).limit(constants.HOME_PAGE_MAX_HOUSES)
+        print houses
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR,errmsg=u'查询房屋信息失败')
@@ -28,9 +55,10 @@ def get_house_index():
     houses_dict_list = []
     for house in houses:
         houses_dict_list.append(house.to_basic_dict())
+    # print houses_dict_list
 
     # 3.响应结果
-        return jsonify(errno=RET.OK,errmsg=u'OK',data=houses_dict_list)
+    return jsonify(errno=RET.OK,errmsg=u'OK',data=houses_dict_list)
 
 
 @api.route('/houses/detail/<int:house_id>')
@@ -101,8 +129,8 @@ def upload_house_image():
     # 选择一个图片，作为房屋的默认图片
     # index_image_url是房屋信息模型的字段
     if not house.index_image_url:
-    # 保存到数据库
         house.index_image_url = key
+    # 保存到数据库
     try:
         db.session.add(house_image)
         db.session.commit()
@@ -174,9 +202,9 @@ def pub_house():
 
     # 处理房屋的设施　facilities = [2,4,6]
     facilities = json_dict.get('facility')
-    print facilities
+    # print facilities
     # 查询出被选中的设施模型                       设施id在facilities这个列表中的所有设施模型
-    house.facilities = Facility.query.filter(Facility.id.in_([1,2,3])).all()
+    house.facilities = Facility.query.filter(Facility.id.in_(facilities)).all()
     #
     # 4.保存到数据库
     try:

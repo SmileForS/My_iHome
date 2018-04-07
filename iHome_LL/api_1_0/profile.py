@@ -71,8 +71,10 @@ def set_user_auth():
         db.session.rollback()
         return jsonify(errno=RET.DBERR,errmsg=u'保存实名认证数据失败')
 
+    # 构造响应数据
+    response_data =user.auth_to_dict()
     # 6.响应结果
-    return jsonify(errno=RET.OK,errmsg=u'实名认证成功')
+    return jsonify(errno=RET.OK,errmsg=u'实名认证成功',data=response_data)
 
 
 @api.route('/users/name',methods=['PUT'])

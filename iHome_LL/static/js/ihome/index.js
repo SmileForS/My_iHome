@@ -86,7 +86,8 @@ $(document).ready(function(){
     // TODO: 获取幻灯片要展示的房屋基本信息
     $.get('/api/1.0/houses/index',function (response) {
         if(response.errno =='0'){
-            var html = template('swiper-houses-tmpl',{'house':response.data});
+            console.log(response.data);
+            var html = template('swiper-houses-tmpl',{'houses':response.data});
             $('.swiper-wrapper').html(html);
             swiper();
         }else{
