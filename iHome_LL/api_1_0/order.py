@@ -7,6 +7,45 @@ import datetime
 from iHome_LL.models import House,Order
 from iHome_LL import db
 
+@api.route('/orders/<int:order_id>/comments',methods=['POST'])
+@login_required
+def set_order_comment(order_id):
+    """发表评价
+   0.判断 用户是否登录
+    1.接收参数:order_id,comment 判断是否为空
+    2.查询要评价的订单
+    3.设置评价信息,修改订单状态
+    4.保存修改到数据库
+    5.响应结果
+    """
+    #　1.接收参数
+    try:
+        comment = request.json.get('comment')
+    except Exception as e:
+        return jsonify(errno=RET.PARAMERR,errmsg=u'缺少评论信息')
+    if not comment:
+        return jsonify(errno=RET.PARAMERR,errmsg=u'缺少评论信息')
+    # 2.查询要评价的订单
+    try:
+        order = Order.query.filter(Order.id==order_id,Order.user_id==g.user_id,Order.status=='WAIT_COMMENT').first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询订单信息失败')
+    if not order:
+        return jsonify(errno=RET.NODATA,errmsg=u'订单不存在')
+    #3.设置评价信息,修改订单状态
+    order.status = 'COMPLETE'
+    order.comment = comment
+    # 4.保存修改到数据库
+    try:
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DBERR,errmsg=u'保存评价信息失败')
+    # 5.响应结果
+    return jsonify(errno=RET.OK,errmsg=u'OK')
+
 @api.route('/orders/<int:order_id>',methods=['PUT'])
 @login_required
 def set_order_status(order_id):
@@ -21,6 +60,10 @@ def set_order_status(order_id):
     :param order_id:
     :return:
     """
+    # 获取action
+    action = request.args.get('action')
+    if action not in ['accept','reject']:
+        return jsonify(errno=RET.PARAMERR,errmsg=u'缺少必要参数')
     # 1.查询order_id对应的订单信息
     try:
         order = Order.query.get(order_id)
@@ -36,7 +79,15 @@ def set_order_status(order_id):
     if order.house.user_id != g.user_id:
         return jsonify(errno=RET.USERERR,errmsg=u'权限不够')
     # 3.修改订单的status属性为'已接单'
-    order.status ='WAIT_COMMENT'
+    if action == 'accept':
+        order.status ='WAIT_COMMENT'
+    else:
+        order.status = 'REJECTED'
+        # 保存拒单理由
+        reason = request.json.get('reason')
+        if not reason:
+            return jsonify(errno=RET.PARAMERR,errmsg=u'缺少拒单理由')
+        order.comment = reason  # 一旦被拒单，就无法评价，可以使用一个字段复用
     # 4.更新数据到数据库
     try:
         db.session.commit()
