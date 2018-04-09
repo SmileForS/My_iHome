@@ -50,8 +50,8 @@ $(document).ready(function(){
                             $('#accept-modal').modal('hide');
                         }else if(response.errno =='4101'){
                             location.href = '/'
-                        }else {
-                            alert(response.errmsg);
+                        }else{
+                             alert(response.errmsg);
                         }
                     }
                 })
@@ -101,7 +101,8 @@ $(document).ready(function(){
                     });
             });
 
-
+        }else if(response.errno == '4002'){
+            $('.orders-list').html('暂无客户订单');
         }else if (response.errno =='4101'){
             location.href = '/';
         }else{
