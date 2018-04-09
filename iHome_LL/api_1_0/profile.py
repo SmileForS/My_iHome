@@ -2,11 +2,37 @@
 # 个人中心
 from flask import session,current_app,jsonify,g,request
 from iHome_LL import db,constants
-from iHome_LL.models import User
+from iHome_LL.models import User,House
 from . import api
 from iHome_LL.utils.image_storage import upload_image
 from iHome_LL.utils.response_code import RET
 from iHome_LL.utils.common import login_required
+
+
+@api.route('/users/houses')
+@login_required
+def get_user_houses():
+    """获取我的房源
+    0.判断用户是否登录
+    1.获取当前登陆用户的user_id
+    2.使用user_id查询该登陆用户发布的房源信息
+    3.构造响应数据
+    4.响应结果
+    """
+    # 1.获取当前登陆用户的user_id
+    user_id = g.user_id
+    # 2.使用user_id查询该登陆用户发布的房源信息
+    try:
+        houses = House.query.filter(House.user_id == user_id).all()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg=u'查询房屋信息失败')
+    # 3.构造响应数据
+    houses_dict_list =[]
+    for house in houses:
+        houses_dict_list.append(house.to_basic_dict())
+    # 4.响应结果
+    return jsonify(errno=RET.OK,errmsg=u'OK',data = houses_dict_list)
 
 
 @api.route('/users/auth',methods=['GET'])
