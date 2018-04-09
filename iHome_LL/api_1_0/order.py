@@ -8,13 +8,14 @@ from iHome_LL.models import House,Order
 from iHome_LL import db
 
 
+
 @api.route('/orders')
 @login_required
 def get_order_list():
     """
     获取订单列表
-    0.判断用户是否登录
-    1.获取参数,user_id = g.user_id
+    0.判断用户是否登录,
+    1.获取参数,user_id = g.user_id,role判断用户角色是房客还是房东
     2.查询用户user_id对应的订单
     3.构造响应数据
     4.响应结果
@@ -22,9 +23,23 @@ def get_order_list():
     """
     # 1.获取参数,user_id = g.user_id
     user_id = g.user_id
+    role = request.args.get('role')
+    if role not in ['custom','landlord']:
+        return jsonify(errno=RET.PARAMERR,errmsg=u'缺少必传参数')
+
     # 2.查询用户user_id对应的订单
     try:
-        orders = Order.query.filter(Order.user_id==user_id).all()
+        # role判断用户角色是房客还是房东
+        if role == 'custom':
+            orders = Order.query.filter(Order.user_id==user_id).all()
+        else:
+            # 查询该用户的发布的房屋信息
+            houses = House.query.filter(House.user_id ==user_id).all()
+            # 获取发布的房屋的ids
+            house_ids = [house.id for house in houses]
+            # 从订单中查询出house_ids在订单中的id(即查找订单中有没有包含house_ids列表中的house_id的订单)
+            orders = Order.query.filter(Order.house_id.in_(house_ids)).all()
+
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.DATAERR,errmsg=u'查询订单信息失败')
